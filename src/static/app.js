@@ -472,6 +472,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Function to share an activity
+  function shareActivity(name, details) {
+    const formattedSchedule = formatSchedule(details);
+    const shareText = `Check out ${name} at Mergington High School! ${details.description} Schedule: ${formattedSchedule}`;
+    const shareUrl = window.location.href;
+
+    // Check if Web Share API is available (mobile devices, modern browsers)
+    if (navigator.share) {
+      navigator.share({
+        title: `${name} - Mergington High School`,
+        text: shareText,
+        url: shareUrl
+      })
+      .then(() => {
+        showMessage("Activity shared successfully!", "success");
+      })
+      .catch((error) => {
+        // User cancelled or error occurred
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+        }
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${shareText} ${shareUrl}`)
+        .then(() => {
+          showMessage("Activity link copied to clipboard!", "success");
+        })
+        .catch((error) => {
+          console.error('Error copying to clipboard:', error);
+          showMessage("Unable to share. Please copy the URL manually.", "error");
+        });
+    }
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -519,6 +554,17 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    // Create social share buttons
+    const shareButtons = `
+      <div class="share-buttons">
+        <button class="share-button tooltip" data-activity="${name}" aria-label="Share ${name} activity with friends">
+          <span class="share-icon">🔗</span>
+          <span class="share-label">Share</span>
+          <span class="tooltip-text">Share this activity with friends</span>
+        </button>
+      </div>
+    `;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -528,6 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      ${shareButtons}
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -575,6 +622,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    shareButton.addEventListener("click", () => {
+      shareActivity(name, details);
     });
 
     // Add click handler for register button (only when authenticated)
