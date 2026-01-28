@@ -557,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create social share buttons
     const shareButtons = `
       <div class="share-buttons">
-        <button class="share-button tooltip" data-activity="${name}" title="Share activity">
+        <button class="share-button tooltip" data-activity="${name}" aria-label="Share ${name} activity with friends">
           <span class="share-icon">🔗</span>
           <span class="share-label">Share</span>
           <span class="tooltip-text">Share this activity with friends</span>
